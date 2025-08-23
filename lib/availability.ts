@@ -24,7 +24,7 @@ export async function getAvailability(providerId: string, dateISO: string): Prom
   // Build 30-min slots
   const slots: Slot[] = [];
   let cursor = startOfDay;
-  while (cursor.add(30, 'minute').isSameOrBefore(endOfDay)) {
+  while (cursor.isBefore(endOfDay)) {
     const slotStart = cursor;
     const slotEnd = cursor.add(30, 'minute');
 
