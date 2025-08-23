@@ -2,9 +2,7 @@ services:
   - type: web
     name: treatment-scheduler
     env: node
-    region: oregon
-    plan: free
-    buildCommand: npm ci && npx prisma generate && npm run build
+    buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -18,5 +16,3 @@ databases:
   - name: treatment-scheduler-db
     databaseName: treatment_scheduler
     user: treatment_scheduler
-    region: oregon
-    plan: free
