@@ -11,10 +11,9 @@ services:
         fromDatabase:
           name: treatment-scheduler-db
           property: connectionString
-  
-  - type: pserv
-    name: treatment-scheduler-db
-    env: postgresql
-    plan: free
+
+databases:
+  - name: treatment-scheduler-db
     databaseName: treatment_scheduler
-    databaseUser: treatment_scheduler
+    user: treatment_scheduler
+    plan: free
