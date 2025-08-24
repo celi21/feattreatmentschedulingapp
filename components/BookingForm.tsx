@@ -38,13 +38,16 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
   }, [treatmentId, providerId, date]);
 
   async function fetchAvailability() {
+    console.log('Fetching availability for:', { providerId, date });
     setIsLoading(true);
     setMessage('');
     try {
       const res = await fetch(`/api/availability?providerId=${providerId}&date=${date}`, { cache: 'no-store' });
       const data = await res.json();
+      console.log('Availability data:', data);
       setSlots(data.slots ?? []);
     } catch (e) {
+      console.error('Failed to fetch availability:', e);
       setMessage('Failed to load availability.');
     } finally {
       setIsLoading(false);
@@ -52,6 +55,8 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
   }
 
   async function book() {
+    console.log('Booking appointment with:', { treatmentId, providerId, selectedStartISO, clientName, clientEmail });
+    
     if (!selectedStartISO || !clientName || !clientEmail) {
       setMessage('Please fill all required fields and select a time.');
       return;
@@ -67,6 +72,7 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
         body: JSON.stringify({ treatmentId, providerId, start: selectedStartISO, clientName, clientEmail, notes }),
       });
       const data = await res.json();
+      console.log('Booking response:', data);
       
       if (res.ok) {
         setMessage('✅ Appointment booked successfully! You will receive a confirmation email.');
@@ -80,6 +86,7 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
         setMessage(`❌ ${data.error || 'Failed to book appointment. Please try again.'}`);
       }
     } catch (e) {
+      console.error('Booking error:', e);
       setMessage('❌ Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
@@ -119,7 +126,17 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
       </div>
 
       <div className="mt-4 flex items-center gap-2">
-        <button onClick={fetchAvailability} className="btn">Check availability</button>
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            fetchAvailability();
+          }}
+          className="btn"
+          type="button"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Loading...' : 'Check availability'}
+        </button>
       </div>
 
       {isLoading && <p className="mt-3 text-sm text-gray-500">Loading...</p>}
@@ -133,7 +150,11 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
               return (
                 <button
                   key={s.start}
-                  onClick={() => setSelectedStartISO(s.start)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedStartISO(s.start);
+                  }}
+                  type="button"
                   className={`btn ${selected ? 'btn-primary' : ''}`}
                 >
                   {label}
@@ -161,8 +182,12 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
 
       <div className="mt-4 flex items-center gap-2">
         <button 
-          onClick={book} 
+          onClick={(e) => {
+            e.preventDefault();
+            book();
+          }}
           className="btn btn-primary" 
+          type="button"
           disabled={isLoading || !selectedStartISO || !clientName || !clientEmail}
         >
           {isLoading ? 'Booking...' : 'Book Appointment'}
