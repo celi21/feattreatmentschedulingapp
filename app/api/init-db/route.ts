@@ -1,73 +1,104 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function POST() {
+export async function GET() {
   try {
     console.log("🚀 Starting database initialization...");
 
-    // First, try to push the schema to create tables if they don't exist
+    // Try to execute raw SQL to create tables if they don't exist
     try {
-      console.log("📋 Checking database connection...");
-      await prisma.$connect();
-      console.log("✅ Database connection successful");
+      await prisma.$executeRaw`
+        CREATE TABLE IF NOT EXISTS "Treatment" (
+          "id" TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          "name" TEXT UNIQUE NOT NULL,
+          "durationMinutes" INTEGER NOT NULL,
+          "priceCents" INTEGER NOT NULL,
+          "isActive" BOOLEAN DEFAULT true,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `;
+
+      await prisma.$executeRaw`
+        CREATE TABLE IF NOT EXISTS "Provider" (
+          "id" TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          "name" TEXT NOT NULL,
+          "email" TEXT UNIQUE NOT NULL,
+          "bio" TEXT,
+          "isActive" BOOLEAN DEFAULT true,
+          "workStartHour" INTEGER DEFAULT 9,
+          "workEndHour" INTEGER DEFAULT 17,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `;
+
+      await prisma.$executeRaw`
+        CREATE TABLE IF NOT EXISTS "Appointment" (
+          "id" TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          "clientName" TEXT NOT NULL,
+          "clientEmail" TEXT NOT NULL,
+          "notes" TEXT,
+          "start" TIMESTAMP NOT NULL,
+          "end" TIMESTAMP NOT NULL,
+          "status" TEXT DEFAULT 'pending',
+          "providerId" TEXT NOT NULL,
+          "treatmentId" TEXT NOT NULL,
+          "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `;
+
+      console.log("✅ Tables created successfully");
     } catch (error) {
-      console.error("❌ Database connection failed:", error);
-      return NextResponse.json({ 
-        error: "Database connection failed",
-        details: error instanceof Error ? error.message : "Unknown error"
-      }, { status: 500 });
+      console.log("Tables might already exist, continuing...");
     }
 
-    // Check if tables exist by trying to count providers
+    // Check if we have data
     let providerCount = 0;
     let treatmentCount = 0;
     
     try {
       providerCount = await prisma.provider.count();
       treatmentCount = await prisma.treatment.count();
-      console.log(`📊 Current data: ${providerCount} providers, ${treatmentCount} treatments`);
     } catch (error) {
-      console.log("ℹ️ Tables don't exist yet, this is expected for first deployment");
-      return NextResponse.json({ 
-        error: "Database tables not created yet",
-        message: "Run 'npx prisma db push' first to create tables",
-        details: error instanceof Error ? error.message : "Unknown error"
-      }, { status: 500 });
+      console.log("Error counting records, but continuing...");
     }
 
-    if (providerCount === 0 || treatmentCount === 0) {
-      console.log("🌱 Seeding database with initial data...");
-      
-      // Create initial data
-      await prisma.provider.createMany({
-        data: [
-          { name: "Alex Rivera", email: "alex@example.com", bio: "Senior therapist", workStartHour: 9, workEndHour: 17 },
-          { name: "Sam Kim", email: "sam@example.com", bio: "Skin specialist", workStartHour: 10, workEndHour: 18 },
-        ],
-        skipDuplicates: true,
-      });
-
-      await prisma.treatment.createMany({
-        data: [
-          { name: "Facial Basic", durationMinutes: 60, priceCents: 6000 },
-          { name: "Body Contouring", durationMinutes: 90, priceCents: 12000 },
-          { name: "Consultation", durationMinutes: 30, priceCents: 0 },
-        ],
-        skipDuplicates: true,
-      });
-
-      console.log("✅ Database seeded successfully");
-      return NextResponse.json({ 
-        message: "Database initialized and seeded successfully",
-        providers: 2,
-        treatments: 3
-      });
+    if (providerCount === 0) {
+      console.log("🌱 Seeding providers...");
+      await prisma.$executeRaw`
+        INSERT INTO "Provider" ("id", "name", "email", "bio", "workStartHour", "workEndHour")
+        VALUES 
+          ('prov1', 'Alex Rivera', 'alex@example.com', 'Senior therapist', 9, 17),
+          ('prov2', 'Sam Kim', 'sam@example.com', 'Skin specialist', 10, 18)
+        ON CONFLICT ("email") DO NOTHING;
+      `;
     }
+
+    if (treatmentCount === 0) {
+      console.log("🌱 Seeding treatments...");
+      await prisma.$executeRaw`
+        INSERT INTO "Treatment" ("id", "name", "durationMinutes", "priceCents")
+        VALUES 
+          ('treat1', 'Facial Basic', 60, 6000),
+          ('treat2', 'Body Contouring', 90, 12000),
+          ('treat3', 'Consultation', 30, 0)
+        ON CONFLICT ("name") DO NOTHING;
+      `;
+    }
+
+    // Get final counts
+    const finalProviderCount = await prisma.provider.count();
+    const finalTreatmentCount = await prisma.treatment.count();
+
+    console.log("✅ Database initialization completed");
 
     return NextResponse.json({ 
-      message: "Database already initialized",
-      providers: providerCount,
-      treatments: treatmentCount
+      message: "Database initialized successfully!",
+      providers: finalProviderCount,
+      treatments: finalTreatmentCount,
+      status: "ready"
     });
 
   } catch (error) {
@@ -81,26 +112,4 @@ export async function POST() {
   }
 }
 
-// Also allow GET requests for easier testing
-export async function GET() {
-  try {
-    await prisma.$connect();
-    const providerCount = await prisma.provider.count();
-    const treatmentCount = await prisma.treatment.count();
-    
-    return NextResponse.json({ 
-      message: "Database status check",
-      providers: providerCount,
-      treatments: treatmentCount,
-      status: "connected"
-    });
-  } catch (error) {
-    return NextResponse.json({ 
-      error: "Database connection failed",
-      details: error instanceof Error ? error.message : "Unknown error",
-      status: "disconnected"
-    }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
-  }
-}
+export const POST = GET; // Allow both GET and POST requests
