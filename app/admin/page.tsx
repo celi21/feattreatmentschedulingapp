@@ -59,8 +59,8 @@ export default async function AdminPage() {
         <h1 className="text-xl font-semibold mb-4">Admin login</h1>
         <form action={doLogin} className="grid gap-3">
           <div>
-            <label className="label">Password</label>
-            <input name="password" type="password" className="input" required />
+            <label htmlFor="admin-password" className="label">Password</label>
+            <input id="admin-password" name="password" type="password" className="input" required />
           </div>
           <button className="btn btn-primary">Login</button>
           <p className="text-xs text-gray-500">Default password: 1125</p>
@@ -85,22 +85,22 @@ export default async function AdminPage() {
       <section className="card grid gap-4">
         <h2 className="text-lg font-semibold">Add treatment</h2>
         <form action={addTreatment} className="grid md:grid-cols-4 gap-3">
-          <input name="name" className="input" placeholder="Name" required />
-          <input name="durationMinutes" type="number" min="10" step="5" className="input" placeholder="Duration (min)" required />
-          <input name="priceEuros" type="number" min="0" step="0.01" className="input" placeholder="Price (€)" required />
-          <button className="btn btn-primary">Add</button>
+          <input name="name" className="input" placeholder="Name" aria-label="Treatment name" required />
+          <input name="durationMinutes" type="number" min="10" step="5" className="input" placeholder="Duration (min)" aria-label="Duration in minutes" required />
+          <input name="priceEuros" type="number" min="0" step="0.01" className="input" placeholder="Price (€)" aria-label="Price in euros" required />
+          <button className="btn btn-primary">Add Treatment</button>
         </form>
       </section>
 
       <section className="card grid gap-4">
         <h2 className="text-lg font-semibold">Add provider</h2>
         <form action={addProvider} className="grid md:grid-cols-6 gap-3">
-          <input name="name" className="input" placeholder="Name" required />
-          <input name="email" type="email" className="input" placeholder="Email" required />
-          <input name="bio" className="input md:col-span-2" placeholder="Bio (optional)" />
-          <input name="startHour" type="number" min="0" max="23" className="input" placeholder="Start hour" />
-          <input name="endHour" type="number" min="0" max="23" className="input" placeholder="End hour" />
-          <button className="btn btn-primary">Add</button>
+          <input name="name" className="input" placeholder="Name" aria-label="Provider name" required />
+          <input name="email" type="email" className="input" placeholder="Email" aria-label="Provider email" required />
+          <input name="bio" className="input md:col-span-2" placeholder="Bio (optional)" aria-label="Provider bio" />
+          <input name="startHour" type="number" min="0" max="23" className="input" placeholder="Start hour" aria-label="Work start hour" />
+          <input name="endHour" type="number" min="0" max="23" className="input" placeholder="End hour" aria-label="Work end hour" />
+          <button className="btn btn-primary">Add Provider</button>
         </form>
       </section>
 
