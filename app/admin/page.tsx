@@ -12,7 +12,7 @@ function isAuthed() {
 
 async function doLogin(formData: FormData) {
   'use server';
-  const secret = process.env.ADMIN_SECRET || 'change-me';
+  const secret = process.env.ADMIN_SECRET || '1125';
   const pwd = formData.get('password');
   if (pwd === secret) {
     cookies().set('admin', '1', { httpOnly: true, sameSite: 'lax', path: '/' });
@@ -63,7 +63,7 @@ export default async function AdminPage() {
             <input name="password" type="password" className="input" required />
           </div>
           <button className="btn btn-primary">Login</button>
-          <p className="text-xs text-gray-500">Set ADMIN_SECRET in your environment.</p>
+          <p className="text-xs text-gray-500">Default password: 1125</p>
         </form>
       </div>
     );

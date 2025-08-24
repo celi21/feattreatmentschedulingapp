@@ -53,10 +53,13 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
 
   async function book() {
     if (!selectedStartISO || !clientName || !clientEmail) {
-      setMessage('Fill all required fields and select a time.');
+      setMessage('Please fill all required fields and select a time.');
       return;
     }
+    
     setIsLoading(true);
+    setMessage('Booking your appointment...');
+    
     try {
       const res = await fetch('/api/appointments', {
         method: 'POST',
@@ -64,15 +67,20 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
         body: JSON.stringify({ treatmentId, providerId, start: selectedStartISO, clientName, clientEmail, notes }),
       });
       const data = await res.json();
+      
       if (res.ok) {
-        setMessage('Booked! Check your email.');
+        setMessage('✅ Appointment booked successfully! You will receive a confirmation email.');
+        // Clear form
         setSlots([]);
         setSelectedStartISO('');
+        setClientName('');
+        setClientEmail('');
+        setNotes('');
       } else {
-        setMessage(data.error || 'Failed to book.');
+        setMessage(`❌ ${data.error || 'Failed to book appointment. Please try again.'}`);
       }
     } catch (e) {
-      setMessage('Failed to book.');
+      setMessage('❌ Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -152,8 +160,18 @@ export default function BookingForm({ treatments, providers }: { treatments: Tre
       </div>
 
       <div className="mt-4 flex items-center gap-2">
-        <button onClick={book} className="btn btn-primary" disabled={isLoading}>Book</button>
-        {message && <span className="text-sm text-gray-600">{message}</span>}
+        <button 
+          onClick={book} 
+          className="btn btn-primary" 
+          disabled={isLoading || !selectedStartISO || !clientName || !clientEmail}
+        >
+          {isLoading ? 'Booking...' : 'Book Appointment'}
+        </button>
+        {message && (
+          <span className={`text-sm ${message.includes('✅') ? 'text-green-600' : message.includes('❌') ? 'text-red-600' : 'text-blue-600'}`}>
+            {message}
+          </span>
+        )}
       </div>
     </div>
   );
