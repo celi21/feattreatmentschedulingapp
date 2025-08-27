@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Calendar, Clock, MapPin, Phone, Globe, ShoppingBag } from 'lucide-react';
 import BookingWidget from './BookingWidget';
 import ProductCatalog from './ProductCatalog';
@@ -69,10 +70,12 @@ export default function PublicBookingPage({ business }: PublicBookingPageProps) 
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center space-x-4">
             {business.logoUrl ? (
-              <img
+              <Image
                 src={business.logoUrl}
                 alt={business.name}
-                className="h-16 w-16 rounded-full object-cover"
+                width={64}
+                height={64}
+                className="rounded-full object-cover"
               />
             ) : (
               <div 

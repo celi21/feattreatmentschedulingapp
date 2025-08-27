@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Plus, Edit2, Trash2, Package, DollarSign, Save, X, Upload, Eye } from 'lucide-react';
 
 interface Product {
@@ -273,10 +274,12 @@ export default function ProductsManager({ business }: ProductsManagerProps) {
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   {previewUrl ? (
-                    <img
+                    <Image
                       src={previewUrl}
                       alt="Preview"
-                      className="h-20 w-20 rounded-lg object-cover border border-gray-300"
+                      width={80}
+                      height={80}
+                      className="rounded-lg object-cover border border-gray-300"
                     />
                   ) : (
                     <div className="h-20 w-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
@@ -430,9 +433,11 @@ export default function ProductsManager({ business }: ProductsManagerProps) {
               <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden">
                 <div className="aspect-square">
                   {product.imageUrl ? (
-                    <img
+                    <Image
                       src={product.imageUrl}
                       alt={product.name}
+                      width={300}
+                      height={300}
                       className="w-full h-full object-cover"
                     />
                   ) : (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { ShoppingCart, Package, CreditCard } from 'lucide-react';
 
 interface Product {
@@ -86,7 +87,7 @@ export default function ProductCatalog({ business, products }: ProductCatalogPro
         <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
         <h3 className="text-xl font-medium text-gray-900 mb-2">No Products Available</h3>
         <p className="text-gray-600">
-          {business.name} hasn't added any products yet. Check back soon!
+          {business.name} hasn&apos;t added any products yet. Check back soon!
         </p>
       </div>
     );
@@ -132,10 +133,12 @@ export default function ProductCatalog({ business, products }: ProductCatalogPro
                   <div key={item.id} className="flex items-center space-x-4 py-4 border-b">
                     <div className="flex-shrink-0">
                       {item.imageUrl ? (
-                        <img
+                        <Image
                           src={item.imageUrl}
                           alt={item.name}
-                          className="h-16 w-16 rounded-md object-cover"
+                          width={64}
+                          height={64}
+                          className="rounded-md object-cover"
                         />
                       ) : (
                         <div className="h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
@@ -196,9 +199,11 @@ export default function ProductCatalog({ business, products }: ProductCatalogPro
           <div key={product.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="aspect-w-1 aspect-h-1">
               {product.imageUrl ? (
-                <img
+                <Image
                   src={product.imageUrl}
                   alt={product.name}
+                  width={400}
+                  height={192}
                   className="w-full h-48 object-cover"
                 />
               ) : (

@@ -117,7 +117,7 @@ export default function LandingPage() {
               <h3 className="text-xl font-semibold mb-2">Secure Payments</h3>
               <p className="text-gray-600">
                 Built-in Stripe integration for secure payment processing. 
-                Your customers' data is always protected.
+                Your customers&apos; data is always protected.
               </p>
             </div>
 
