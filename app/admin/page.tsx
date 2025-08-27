@@ -33,12 +33,8 @@ async function addTreatment(formData: FormData) {
 async function addProvider(formData: FormData) {
   'use server';
   if (!isAuthed()) redirect('/admin');
-  const name = String(formData.get('name') || '');
-  const email = String(formData.get('email') || '');
-  const bio = String(formData.get('bio') || '');
-  const workStartHour = Number(formData.get('startHour') || 9);
-  const workEndHour = Number(formData.get('endHour') || 17);
-  await prisma.provider.create({ data: { name, email, bio, workStartHour, workEndHour, isActive: true } });
+  // Note: This legacy admin function is disabled. Use the business dashboard instead.
+  // Providers are now associated with specific businesses.
   revalidatePath('/admin');
 }
 
@@ -72,7 +68,10 @@ export default async function AdminPage() {
   const [treatments, providers, appointments] = await Promise.all([
     prisma.treatment.findMany({ orderBy: { name: 'asc' } }),
     prisma.provider.findMany({ orderBy: { name: 'asc' } }),
-    prisma.appointment.findMany({ orderBy: { start: 'desc' }, include: { provider: true, treatment: true } }),
+    prisma.appointment.findMany({ 
+      orderBy: { start: 'desc' }, 
+      include: { provider: true, service: true, business: true } 
+    }),
   ]);
 
   return (
@@ -125,17 +124,17 @@ export default async function AdminPage() {
                   <tr key={a.id}>
                     <td>{new Date(a.start).toLocaleString()} — {new Date(a.end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
                     <td>{a.clientName} <div className="text-xs text-gray-500">{a.clientEmail}</div></td>
-                    <td>{a.treatment.name}</td>
+                    <td>{a.service.name}</td>
                     <td>{a.provider.name}</td>
                     <td><span className={badgeClass}>{a.status}</span></td>
                     <td>
                       <form action={setStatus} className="flex items-center gap-2">
                         <input type="hidden" name="id" value={a.id} />
                         <select name="status" className="input">
-                          <option value="pending">pending</option>
-                          <option value="confirmed">confirmed</option>
-                          <option value="completed">completed</option>
-                          <option value="cancelled">cancelled</option>
+                          <option value="PENDING">PENDING</option>
+                          <option value="CONFIRMED">CONFIRMED</option>
+                          <option value="COMPLETED">COMPLETED</option>
+                          <option value="CANCELLED">CANCELLED</option>
                         </select>
                         <button className="btn">Update</button>
                       </form>

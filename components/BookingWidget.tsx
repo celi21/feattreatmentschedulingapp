@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar, Clock, User, CreditCard } from 'lucide-react';
 
 interface Service {
@@ -61,13 +61,7 @@ export default function BookingWidget({ business, services, providers }: Booking
                      !selectedDate ? 2 : 
                      !selectedSlot ? 3 : 4;
 
-  useEffect(() => {
-    if (selectedService && selectedProvider && selectedDate) {
-      fetchAvailableSlots();
-    }
-  }, [selectedService, selectedProvider, selectedDate]);
-
-  const fetchAvailableSlots = async () => {
+  const fetchAvailableSlots = useCallback(async () => {
     if (!selectedProvider || !selectedDate) return;
     
     setIsLoadingSlots(true);
@@ -84,7 +78,13 @@ export default function BookingWidget({ business, services, providers }: Booking
     } finally {
       setIsLoadingSlots(false);
     }
-  };
+  }, [selectedProvider, selectedDate, business.id]);
+
+  useEffect(() => {
+    if (selectedService && selectedProvider && selectedDate) {
+      fetchAvailableSlots();
+    }
+  }, [selectedService, selectedProvider, selectedDate, fetchAvailableSlots]);
 
   const handleBooking = async () => {
     if (!selectedService || !selectedProvider || !selectedSlot || !customerName || !customerEmail) {

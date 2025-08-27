@@ -1,1 +1,27 @@
-{}
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/register/route": "app/api/auth/register/route.js",
+  "/api/business/[businessId]/appointments/route": "app/api/business/[businessId]/appointments/route.js",
+  "/api/business/[businessId]/availability/route": "app/api/business/[businessId]/availability/route.js",
+  "/api/business/[businessId]/products/[productId]/route": "app/api/business/[businessId]/products/[productId]/route.js",
+  "/api/business/[businessId]/products/route": "app/api/business/[businessId]/products/route.js",
+  "/api/business/[businessId]/services/route": "app/api/business/[businessId]/services/route.js",
+  "/api/business/[businessId]/services/[serviceId]/route": "app/api/business/[businessId]/services/[serviceId]/route.js",
+  "/api/business/setup/route": "app/api/business/setup/route.js",
+  "/api/business/[businessId]/upload/route": "app/api/business/[businessId]/upload/route.js",
+  "/api/test-env/route": "app/api/test-env/route.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/setup-db/route": "app/api/setup-db/route.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/auth/signup/page": "app/auth/signup/page.js",
+  "/dashboard/services/page": "app/dashboard/services/page.js",
+  "/onboarding/page": "app/onboarding/page.js",
+  "/dashboard/products/page": "app/dashboard/products/page.js",
+  "/api/appointments/route": "app/api/appointments/route.js",
+  "/api/availability/route": "app/api/availability/route.js",
+  "/admin/page": "app/admin/page.js",
+  "/page": "app/page.js",
+  "/api/init-db/route": "app/api/init-db/route.js",
+  "/book/[slug]/page": "app/book/[slug]/page.js"
+}

@@ -27,7 +27,7 @@ export async function getAvailability(providerId: string, dateISO: string): Prom
     const appointments = await prisma.appointment.findMany({
       where: {
         providerId,
-        status: { in: ['pending', 'confirmed', 'completed'] },
+        status: { in: ['PENDING', 'CONFIRMED', 'COMPLETED'] },
         start: { lt: endOfDay.toDate() },
         end: { gt: startOfDay.toDate() }
       },

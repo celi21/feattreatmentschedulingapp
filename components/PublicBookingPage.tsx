@@ -174,7 +174,7 @@ export default function PublicBookingPage({ business }: PublicBookingPageProps) 
                 <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-medium text-gray-900 mb-2">No Services Available</h3>
                 <p className="text-gray-600">
-                  {business.name} hasn't added any services yet. Check back soon!
+                  {business.name} hasn&apos;t added any services yet. Check back soon!
                 </p>
               </div>
             )}

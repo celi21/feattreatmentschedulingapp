@@ -23,14 +23,8 @@ export async function POST() {
 
     console.log("🌱 Seeding database...");
 
-    // Create initial providers
-    await prisma.provider.createMany({
-      data: [
-        { name: "Alex Rivera", email: "alex@example.com", bio: "Senior therapist", workStartHour: 9, workEndHour: 17 },
-        { name: "Sam Kim", email: "sam@example.com", bio: "Skin specialist", workStartHour: 10, workEndHour: 18 },
-      ],
-      skipDuplicates: true,
-    });
+    // Note: Provider seeding disabled - providers are now business-specific
+    // Use the business dashboard to add providers to your business
 
     // Create initial treatments
     await prisma.treatment.createMany({

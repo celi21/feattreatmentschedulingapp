@@ -111,7 +111,7 @@ export default function DashboardOverview({ business }: DashboardOverviewProps) 
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Welcome back!</h1>
-            <p className="text-gray-600">Here's what's happening with {business.name} today.</p>
+            <p className="text-gray-600">Here&apos;s what&apos;s happening with {business.name} today.</p>
           </div>
           <div className="flex space-x-3">
             <Link
@@ -146,8 +146,7 @@ export default function DashboardOverview({ business }: DashboardOverviewProps) 
                 <div className="flex items-baseline">
                   <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
                   <span className={`ml-2 text-sm font-medium ${
-                    stat.changeType === 'positive' ? 'text-green-600' :
-                    stat.changeType === 'negative' ? 'text-red-600' : 'text-gray-500'
+                    stat.changeType === 'positive' ? 'text-green-600' : 'text-gray-500'
                   }`}>
                     {stat.change}
                   </span>
@@ -262,7 +261,7 @@ export default function DashboardOverview({ business }: DashboardOverviewProps) 
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-medium text-blue-900">
-                You're on the Free plan
+                You&apos;re on the Free plan
               </h3>
               <p className="text-blue-700">
                 You have {8 - business._count.services} service slots remaining. 

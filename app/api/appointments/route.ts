@@ -15,48 +15,9 @@ const Body = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const json = await req.json().catch(() => null);
-  const parsed = Body.safeParse(json);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-  }
-  const { treatmentId, providerId, start, clientName, clientEmail, notes } = parsed.data;
-
-  const treatment = await prisma.treatment.findUnique({ where: { id: treatmentId } });
-  if (!treatment || !treatment.isActive) {
-    return NextResponse.json({ error: "Invalid treatment" }, { status: 400 });
-  }
-
-  const provider = await prisma.provider.findUnique({ where: { id: providerId } });
-  if (!provider || !provider.isActive) {
-    return NextResponse.json({ error: "Invalid provider" }, { status: 400 });
-  }
-
-  const startDt = dayjs(start);
-  const endDt = startDt.add(treatment.durationMinutes, 'minute');
-
-  // Conflict check
-  const overlap = await prisma.appointment.findFirst({
-    where: {
-      providerId,
-      status: { in: ['pending', 'confirmed', 'completed'] },
-      start: { lt: endDt.toDate() },
-      end: { gt: startDt.toDate() }
-    }
-  });
-  if (overlap) {
-    return NextResponse.json({ error: "Slot no longer available" }, { status: 409 });
-  }
-
-  const appt = await prisma.appointment.create({
-    data: {
-      clientName, clientEmail, notes,
-      start: startDt.toDate(),
-      end: endDt.toDate(),
-      providerId, treatmentId,
-      status: 'pending'
-    }
-  });
-
-  return NextResponse.json({ id: appt.id, status: appt.status });
+  // Legacy API route - disabled in favor of the new business-specific appointment system
+  // Use /api/business/[businessId]/appointments instead
+  return NextResponse.json({ 
+    error: "This API endpoint has been deprecated. Use the business-specific appointment system instead." 
+  }, { status: 410 });
 }

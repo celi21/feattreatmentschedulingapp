@@ -49,9 +49,19 @@ export default async function DashboardPage() {
 
   const business = businesses[0]; // For now, handle single business
 
+  // Convert Date objects to strings for the component
+  const businessForComponent = {
+    ...business,
+    appointments: business.appointments.map(apt => ({
+      ...apt,
+      start: apt.start.toISOString(),
+      end: apt.end.toISOString(),
+    }))
+  };
+
   return (
     <DashboardLayout business={business} user={session.user}>
-      <DashboardOverview business={business} />
+      <DashboardOverview business={businessForComponent} />
     </DashboardLayout>
   );
 }

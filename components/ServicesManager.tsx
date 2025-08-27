@@ -205,7 +205,7 @@ export default function ServicesManager({ business }: ServicesManagerProps) {
       {!canAddService && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-yellow-800">
-            You've reached the service limit for the Free plan. 
+            You&apos;ve reached the service limit for the Free plan. 
             <a href="/dashboard/settings/billing" className="font-medium underline ml-1">
               Upgrade to add unlimited services.
             </a>

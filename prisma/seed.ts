@@ -2,14 +2,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const providers = await prisma.provider.createMany({
-    data: [
-      { name: "Alex Rivera", email: "alex@example.com", bio: "Senior therapist", workStartHour: 9, workEndHour: 17 },
-      { name: "Sam Kim", email: "sam@example.com", bio: "Skin specialist", workStartHour: 10, workEndHour: 18 },
-    ],
-    skipDuplicates: true,
-  });
-
+  // Legacy seed disabled - use the new business dashboard to set up your data
+  // Providers and services are now business-specific in the new schema
+  
   const treatments = await prisma.treatment.createMany({
     data: [
       { name: "Facial Basic", durationMinutes: 60, priceCents: 6000 },
@@ -19,7 +14,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("Seed complete.");
+  console.log("Legacy treatments seeded for backward compatibility.");
 }
 
 main().finally(async () => prisma.$disconnect());
