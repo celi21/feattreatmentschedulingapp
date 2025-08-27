@@ -9,52 +9,253 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model Treatment {
-  id              String  @id @default(cuid())
-  name            String  @unique
-  durationMinutes Int
-  priceCents      Int
-  isActive        Boolean @default(true)
-  appointments    Appointment[]
+// Business Owner/User Management
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  isEmailVerified Boolean  @default(false)
+  businesses      Business[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
-model Provider {
-  id              String  @id @default(cuid())
+model Business {
+  id                String       @id @default(cuid())
+  name              String
+  slug              String       @unique  // For public booking URLs
+  description       String?
+  website           String?
+  phone             String?
+  email             String?
+  address           String?
+  city              String?
+  state             String?
+  zipCode           String?
+  country           String       @default("US")
+  
+  // Branding
+  logoUrl           String?
+  primaryColor      String       @default("#000000")
+  backgroundColor   String       @default("#ffffff")
+  
+  // Subscription & Billing
+  subscriptionTier  SubscriptionTier @default(FREE)
+  stripeCustomerId  String?
+  isActive          Boolean      @default(true)
+  
+  // Settings
+  timezone          String       @default("America/New_York")
+  currency          String       @default("USD")
+  
+  // Relations
+  owner             User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId           String
+  services          Service[]
+  products          Product[]
+  providers         Provider[]
+  appointments      Appointment[]
+  orders            Order[]
+  analytics         BusinessAnalytics[]
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([slug])
+  @@index([ownerId])
+}
+
+enum SubscriptionTier {
+  FREE
+  TIER_ONE
+  TIER_TWO
+}
+
+// Services (formerly Treatments)
+model Service {
+  id              String       @id @default(cuid())
   name            String
-  email           String  @unique
-  bio             String?
-  isActive        Boolean @default(true)
-  workStartHour   Int     @default(9)   // 0-23
-  workEndHour     Int     @default(17)  // 0-23
+  description     String?
+  durationMinutes Int
+  priceCents      Int
+  isActive        Boolean      @default(true)
+  category        String?
+  
+  business        Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId      String
   appointments    Appointment[]
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([businessId, isActive])
+}
+
+// Product Catalog
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  priceCents      Int
+  sku             String?
+  isActive        Boolean  @default(true)
+  isDigital       Boolean  @default(false)
+  stockQuantity   Int?     // null = unlimited/digital
+  
+  // Media
+  imageUrl        String?
+  imageAlt        String?
+  
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId      String
+  orderItems      OrderItem[]
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([businessId, isActive])
+}
+
+model Provider {
+  id              String   @id @default(cuid())
+  name            String
+  email           String?
+  bio             String?
+  isActive        Boolean  @default(true)
+  workStartHour   Int      @default(9)   // 0-23
+  workEndHour     Int      @default(17)  // 0-23
+  
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId      String
+  appointments    Appointment[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([businessId, isActive])
 }
 
 model Appointment {
   id           String   @id @default(cuid())
   clientName   String
   clientEmail  String
+  clientPhone  String?
   notes        String?
   start        DateTime
   end          DateTime
-  status       Status   @default(pending)
-  provider     Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  status       AppointmentStatus @default(PENDING)
+  
+  // Payment Info
+  totalCents   Int
+  platformFeeCents Int  // Our 2.9% fee
+  stripePaymentIntentId String?
+  
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId   String
+  provider     Provider @relation(fields: [providerId], references: [id], onDelete: Restrict)
   providerId   String
-  treatment    Treatment @relation(fields: [treatmentId], references: [id], onDelete: Restrict)
-  treatmentId  String
+  service      Service  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  serviceId    String
+  
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  @@index([businessId, start, end])
   @@index([providerId, start, end])
   @@index([status])
 }
 
-enum Status {
-  pending
-  confirmed
-  cancelled
-  completed
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+// Orders for Product Purchases
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  
+  subtotalCents   Int
+  platformFeeCents Int         // Our 2.9% fee
+  totalCents      Int
+  
+  status          OrderStatus @default(PENDING)
+  stripePaymentIntentId String?
+  
+  business        Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId      String
+  items           OrderItem[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([businessId])
+  @@index([orderNumber])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  quantity    Int
+  priceCents  Int     // Price at time of purchase
+  
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId   String
+  
+  createdAt   DateTime @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+// Analytics
+model BusinessAnalytics {
+  id              String   @id @default(cuid())
+  date            DateTime @db.Date
+  
+  // Revenue metrics
+  totalRevenueCents Int    @default(0)
+  platformFeeCents  Int    @default(0)
+  appointmentCount  Int    @default(0)
+  orderCount        Int    @default(0)
+  
+  // Customer metrics
+  newCustomers      Int    @default(0)
+  returningCustomers Int   @default(0)
+  
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId      String
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([businessId, date])
+  @@index([businessId, date])
+}
+
+// Legacy models for backward compatibility (will be migrated)
+model Treatment {
+  id              String  @id @default(cuid())
+  name            String  @unique
+  durationMinutes Int
+  priceCents      Int
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
